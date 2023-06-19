@@ -1,0 +1,89 @@
+---
+title: "CC INF 523"
+author: "ABDOULRAMANE ABOU DJAFAR - 16A0029FS"
+date: "2023-06-16"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# TPE INF 523: Fondements Mathématiques et Informatiques de la science des donnée
+
+## Exercice 1
+Considérons un échantillon aléatoire de finisseurs du marathon de New York en 2002. Cet ensemble de données se trouve dans le package **UsingR**. Chargeons le package, puis chargeons l’ensemble de données **nym.2002**.
+
+```{r}
+library(UsingR)
+data("nym.2002")
+df <- nym.2002
+```
+
+### 1. Utilisons des __boîtes à moustaches__ et des __histogrammes__ pour comparer les temps d’arrivée des hommes et des femmes.
+#### Comparaison avec les boîtes à moustaches. 
+```{r}
+library(ggplot2)
+ggplot(df) + aes(x = gender, y = time) + geom_boxplot(fill = c("pink", "turquoise")) + ggtitle("Repartition des hommes et des femmes selon le temps d'arrivée") + xlab("Genre") + ylab("Temps d'arrivée")
+```
+Selon le graphique ci-dessus, il en ressort que la sous-population des **hommes (Male)** a une repartition des temps d'arrivées qui tournent autours de **220-300 unités** alors que celui des **femmes (Female)** gravitents autours de **250-310 unités**. Ce qui nous permet de déduire que les performances des hommes sont plus élévées que celles des femmes selon ces données.
+
+#### Comparaison avec les histogrammes
+```{r}
+hoe <- ggplot() + aes(df$time[df$gender == "Male"]) + geom_histogram(fill = "turquoise", col = "gray") + ggtitle("") + xlab("Temps d'arrivée") + ylab("Fréquence des éffectifs")
+
+fem <- ggplot() + aes(df$time[df$gender == "Female"]) + geom_histogram(fill = "pink", col = "gray") + ggtitle("") + xlab("Temps d'arrivée") + ylab("Fréquence des éffectifs")
+
+library(ggpubr)
+fig_hist <- ggarrange(hoe, fem, labels = c("Hommes", "Femmes"), ncol = 2, nrow = 1)
+annotate_figure(fig_hist, top = text_grob("Temps d'arrivée par genre en fonction de leur éffectif", color = "black", face = "bold", size = 14))
+```
+Selon les graphiques ci-dessus, il en ressort que la __fréquence maximale des éffectifs des hommes__ est relativement proche d'un temps d'arrivé dans l'intervalle **]200; 250]** alors que celle des __femmes__ se retrouve dans l'intervalle **]250; 300]**. En d'autres termes, il y a plus d'hommes qui enregistrent un chrono court que les femmes qui le font.
+Ce qui nous permet d'en déduire que les performances des hommes sont plus optimales que celles des femmes.
+
+#### Malgré que l'on puisse faire des interprétations selon ces deux types de graphiques, celui en **histogramme** est un peu plus complexe à interpréter que celui en **boîte à mpustache**.
+
+### 2.Utilisons **dplyr** pour créer deux nouvelles trames de données : **hommes** et **femmes**, avec les données pour chaque sexe:
+```{r}
+library(dplyr)
+pop_homme <- df %>% filter(gender == "Male")
+pop_femme <- df %>% filter(gender == "Female")
+```
+
+### 3. Déterminons la corrélation entre l’âge et le temps pour terminer chez les hommes:
+```{r}
+ggplot(pop_homme) + aes(x = time, y = age) + geom_point() + geom_smooth(colour="blue", method="lm", fill="skyblue") + ggtitle("Repartition du temps d'arrivé chez les hommes en fonction de l'âge") + xlab("Temps d'arrivée") + ylab("Age")
+```
+Selon ce graphique, les performances (temps d'arrivée) chez les hommes ont un dégré d'entropie assez prononcé, ce qui nous permet de supposer qu'il y a un très faible lien entre l'âge des hommes et leurs temps d'arrivé.
+Mais d'une autre part, lorsque nous observons le graphique ci-dessous, nous remarquons que plus l'âge augmente, plus le temps d'arrivé augmente chez les hommes et de fait les performances diminuent.
+```{r}
+ggplot(pop_homme) + aes(x = time, y = age) + geom_smooth(method = "loess", se = FALSE, color = "blue") + ggtitle("Evolution du temps d'arrivé chez les hommes en fonction de l'âge") + xlab("Temps d'arrivée") + ylab("Age")
+```
+
+Ceci étant, vérifions cela par une métrique bien spécifique:
+```{r}
+cor.test(~ time + age, pop_homme)
+```
+Il y a donc une **faible correlation** entre ces deux modalités: __24%__. Ce qui nous permet de supposer que les performances ne sont pas liés à l'âge.
+
+### 4. Déterminons la corrélation entre l’âge et le temps pour terminer chez les femmes:
+```{r}
+ggplot(pop_femme) + aes(x = time, y = age) + geom_point() + geom_smooth(colour="red", method="lm", fill="pink") + ggtitle("Repartition du temps d'arrivé chez les femmes en fonction de l'âge") + xlab("Temps d'arrivée") + ylab("Age")
+```
+```{r}
+ggplot(pop_femme) + aes(x = time, y = age) + geom_smooth(method = "loess", se = FALSE, color = "red") + ggtitle("Evolution du temps d'arrivé chez les femmes en fonction de l'âge") + xlab("Temps d'arrivée") + ylab("Age")
+```
+
+
+```{r}
+cor.test(~ time + age, pop_femme)
+```
+Il en est de même pour la sous-population des femmes. La correlation entre le temps d'arrivé et l'âge n'est que de **24%**.
+
+### 5. Examinons les diagrammes de dispersion et les boîtes à moustaches des heures stratifiées par tranches d’âge (20-24, 25-30, etc.):
+```{r}
+
+```
+
